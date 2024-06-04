@@ -1,0 +1,23 @@
+def min_units(value, units):
+    dp = [float('inf')] * (value + 1)
+    dp[0] = 0
+
+    for i in range(1, value + 1):
+        for unit in units:
+            if i >= unit:
+                dp[i] = min(dp[i], dp[i - unit] + 1)
+    
+    return dp[value]
+
+def averagebelow100(units):
+    total_units = sum(min_units(value, units) for value in range(1, 100))
+    return total_units / 99
+
+
+units = list(map(int, input().split()))
+
+average_units = averagebelow100(units)
+print(f"Avg units used: {average_units:.1f}")
+
+Output:
+Avg units:3.4
