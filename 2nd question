@@ -1,23 +1,15 @@
-def min_units(value, units):
-    dp = [float('inf')] * (value + 1)
-    dp[0] = 0
+def find_avg(units):
+    units_cnt = 0
+    units.sort(reverse=True)
+    for val in range(100) :
+        cur_cnt = 0
+        for i in units :
+            if val>=i :
+                count = val//i
+                cur_cnt += count
+                val = val%i
+        units_cnt += cur_cnt
+    return units_cnt/100
 
-    for i in range(1, value + 1):
-        for unit in units:
-            if i >= unit:
-                dp[i] = min(dp[i], dp[i - unit] + 1)
-    
-    return dp[value]
-
-def averagebelow100(units):
-    total_units = sum(min_units(value, units) for value in range(1, 100))
-    return total_units / 99
-
-
-units = list(map(int, input().split()))
-
-average_units = averagebelow100(units)
-print(f"Avg units used: {average_units:.1f}")
-
-Output:
-Avg units:3.4
+units = list(map(int,input().split()))
+print("AVG of units =",find_avg(units))
