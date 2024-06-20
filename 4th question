@@ -1,85 +1,64 @@
-                               +-----------------+
-                               |      Users      |
-                               +--------+--------+
-                                        |
-                                        |
-                               +--------v--------+
-                               |  User Interface |
-                               |     (UI)        |
-                               +--------+--------+
-                                        |
-                            +-----------v-----------+
-                            |  Portfolio Service    |
-                            +-----------+-----------+
-                                        |
-           +----------------------------+---------------------------+
-           |                            |                           |
-+----------v----------+      +----------v----------+     +----------v----------+
-|  Authentication     |      |  Asset Service      |     |  Pricing Service    |
-|     Service         |      +----------+----------+     +----------+----------+
-+----------+----------+                 |                         |
-           |                            |                         |
-+----------v----------+   +-------------v------------+    +-------v-------------+
-|      User DB        |   |        Asset DB          |    |      Pricing DB     |
-+---------------------+   +--------------------------+    +---------------------+
-           |                                                      |
-           |                                                      |
-           |                                                      |
-           |                                      +---------------v---------------+
-           |                                      |           Event Queue          |
-           |                                      +---------------+---------------+
-           |                                                      |
-           |                                                      |
-+----------v----------+                              +------------v-------------+
-|   Portfolio DB      |                              |           Workers        |
-+----------+----------+                              +------------+-------------+
-           |                                                      |
-           |                                                      |
-           +-------------------+                                  |
-                               |                                  |
-                 +-------------v-------------+                    |
-                 |    Notification Service   |                    |
-                 +-------------+-------------+                    |
-                               |                                  |
-                               +----------------------------------v---------------+
-                                                  |         Scheduler           |
-                                                  +------------+-----------------+
-                                                               |
-                                                               | Every 10 minutes
-                                                               v
-                                                 +-------------v-------------+
-                                                 |       Price Feeds         |
-                                                 +---------------------------+
-
-                                     
++-----------------------+
+|       Users (250)     |
++-----------+-----------+
+              |
+              |
++-----------v-----------+
+|   User Interface (UI) |
++-----------+-----------+
+              |
++-------------v----------------+
+| Portfolio Management Service |
++-------------+----------------+
+              |
++-------------+------------------------------------+
+|                                                |
++--------------------v--------------+  +----------v----------+
+|    User Account Service           |  |    Price Data       |
++-----------------+-----------------+  | (External Sources)  |
+                  |                    +----------+----------+
+                  |                               |
++-----------------v-----------------+   +---------v-----------+
+|       Portfolio Database          |   |     Asset Database  |
++-----------------+-----------------+   +---------------------+
+                  |
++-----------------v-----------------+
+|     Real-Time Data Store          |
++-----------------+-----------------+
+                  |
++-----------------v-----------------+
+|       Market Data Feed            |
++-----------------+-----------------+
+                  |
++-----------------v-----------------+
+|           Cache                   |
++-----------------+-----------------+
+                  |
++-----------------v-----------------+                 +----------------+
+| Notification Service              |                 |  Alerting      |
++-----------------+-----------------+                 +--------+-------+
+                  |                                      |
+                  +--------------------------------------+
+    
 
 Explanation:
+•	Users (250): Represents the platform's users who can create and manage their portfolios.
+•	User Interface (UI): The front-end interface where users interact with the platform to view their portfolios, assets, and potentially add new assets.
+•	Portfolio Management Service: The core service responsible for portfolio creation, calculation, and maintenance. It interacts with various components to fetch data, calculate portfolio value, and update the user interface.
+•	User Account Service: Manages user accounts, authentication, and user-related information.
+•	Portfolio Database: Stores user portfolio details, including asset holdings and historical data.
+•	Asset Database: Stores information about available assets (stocks, mutual funds) like their names, symbols, and potentially basic descriptions. This can be integrated with the Portfolio Database if the data model allows.
+•	Real-Time Data Store: Stores real-time asset prices received from external sources.
+•	Price Data (External Sources): Represents external sources (e.g., financial APIs, market data feeds) that provide real-time or near real-time asset prices.
+•	Market Data Feed: Continuously fetches and updates asset prices in the Real-Time Data Store, ensuring the system has the latest information.
+•	Cache: (Optional) A layer that can be implemented to store frequently accessed data (e.g., recently retrieved asset prices) to improve performance and reduce load on external sources.
+•	Notification Service: (Optional) Sends alerts or notifications to users about significant portfolio changes or price movements.
+•	Alerting Service: (Optional) Monitors portfolio performance and triggers alerts based on pre-defined user preferences (e.g., price reaching a certain threshold).
+Key Features:
+•	Real-Time Updates: Utilizes a market data feed and real-time data store to ensure users see their portfolio value reflect the latest asset prices.
+•	Scalability: Designed to handle an increasing number of users and assets.
+•	Reliability: Emphasizes reliable data retrieval, processing, and storage for accurate portfolio calculations.
+•	Data Refresh: Regularly updates portfolios based on a refresh schedule (every 10 minutes in this case).
+This high-level design diagram ensures a clear representation of how each component interacts within the system, emphasizing scalability, real-time updates, and reliability.
 
-1. Users: Users log in and view their portfolios through the User Interface (UI).
 
-2. User Interface (UI): Allows users to access their portfolios in real-time.
-
-3. Authentication Service: Ensures secure access to portfolio data by managing user authentication and authorization.
-
-4. Portfolio Service: Manages user portfolios, calculating and maintaining them by fetching and updating portfolio information.
-
-5. Asset Service: Manages details of individual assets (such as stocks and mutual funds) and interacts with the Asset Database.
-
-6. Pricing Service: Retrieves real-time prices from external sources (Price Feeds) and updates the Pricing Database.
-
-7. Databases:
-
-- User DB: Stores user credentials and profile information.
-- Portfolio DB: Contains portfolio details, including user assets and quantities.
-- Asset DB: Stores information about different assets.
-- Pricing DB: Holds the most recent asset prices fetched from external sources.
-
-8. Event Queue: Manages the asynchronous processing of price updates and other events to ensure efficient handling of high loads by the system.
-
-9. Workers: Process events from the Event Queue to update portfolios with new prices promptly.
-
-10. Notification Service: Notifies users of important updates or changes in their portfolios.
-
-11. Scheduler: Activates the Pricing Service every 10 minutes to retrieve and refresh asset prices, guaranteeing that the information is always up-to-date.
-
-12. Price Feeds: External sources providing real-time asset prices fetched by the Pricing Service.
